@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>統合失調症薬物治療アンケート</title>
+  <style>
+    :root {
+      --bg: #f7f8fb;
+      --panel: #ffffff;
+      --text: #172033;
+      --muted: #667085;
+      --line: #d9dee8;
+      --accent: #0f766e;
+      --accent-weak: #d9f4ef;
+      --danger: #b42318;
+      --focus: #f59e0b;
+      --shadow: 0 12px 32px rgba(24, 35, 56, .08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--text);
+      background: var(--bg);
+      line-height: 1.6;
+    }
+    header {
+      background: var(--panel);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .bar {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 14px 18px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+    }
+    h1 {
+      font-size: clamp(1.1rem, 2vw, 1.55rem);
+      margin: 0;
+      letter-spacing: 0;
+    }
+    .progress {
+      min-width: 220px;
+      font-size: .86rem;
+      color: var(--muted);
+    }
+    .progress-track {
+      height: 8px;
+      background: #edf0f5;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 5px;
+    }
+    .progress-fill {
+      width: 0%;
+      height: 100%;
+      background: var(--accent);
+      transition: width .2s ease;
+    }
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px 18px 48px;
+    }
+    .intro, .section {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      margin-bottom: 18px;
+      overflow: hidden;
+    }
+    .intro { padding: 20px; }
+    .section-head {
+      padding: 18px 20px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+    }
+    .section-head h2 {
+      margin: 0 0 8px;
+      font-size: 1.08rem;
+      letter-spacing: 0;
+    }
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+      white-space: pre-line;
+    }
+    .section-body { padding: 18px 20px 20px; }
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    label.field span, .consent-title {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    input[type="text"], input[type="number"] {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      padding: 11px 12px;
+      font: inherit;
+      background: #fff;
+    }
+    input:focus, button:focus {
+      outline: 3px solid rgba(245, 158, 11, .35);
+      outline-offset: 2px;
+    }
+    .consent-box {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 14px;
+      background: #fbfcfe;
+      margin-top: 12px;
+    }
+    .choice-line {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      font-weight: 700;
+    }
+    .matrix-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+    table.matrix {
+      width: 100%;
+      min-width: 760px;
+      border-collapse: collapse;
+      background: #fff;
+    }
+    .matrix th, .matrix td {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 7px;
+      text-align: center;
+      vertical-align: middle;
+    }
+    .matrix th:first-child, .matrix td:first-child {
+      text-align: left;
+      min-width: 260px;
+      position: sticky;
+      left: 0;
+      background: #fff;
+      z-index: 1;
+      box-shadow: 1px 0 0 var(--line);
+    }
+    .matrix thead th {
+      background: #f3f6fa;
+      font-size: .86rem;
+      white-space: nowrap;
+    }
+    .matrix thead th:first-child { background: #f3f6fa; z-index: 2; }
+    .matrix tbody tr:nth-child(even) td,
+    .matrix tbody tr:nth-child(even) td:first-child { background: #fbfcfe; }
+    .radio-cell label {
+      display: grid;
+      place-items: center;
+      min-width: 34px;
+      min-height: 34px;
+      cursor: pointer;
+    }
+    .radio-cell input { width: 18px; height: 18px; }
+    .hint {
+      font-size: .9rem;
+      color: var(--muted);
+      margin: 12px 0 0;
+    }
+    .error {
+      color: var(--danger);
+      font-weight: 700;
+      margin-top: 10px;
+      display: none;
+    }
+    .section.invalid {
+      border-color: rgba(180, 35, 24, .55);
+    }
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+      position: sticky;
+      bottom: 14px;
+      z-index: 15;
+    }
+    button {
+      appearance: none;
+      border: 1px solid var(--accent);
+      background: var(--accent);
+      color: white;
+      border-radius: 7px;
+      padding: 10px 14px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    button.secondary {
+      background: #fff;
+      color: var(--accent);
+    }
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+    .status {
+      color: var(--muted);
+      font-size: .92rem;
+      margin-left: auto;
+    }
+    .output {
+      background: #101828;
+      color: #f2f4f7;
+      border-radius: 8px;
+      padding: 14px;
+      overflow: auto;
+      max-height: 260px;
+      display: none;
+      white-space: pre;
+      font-size: .84rem;
+    }
+    @media (max-width: 760px) {
+      .bar { grid-template-columns: 1fr; }
+      .progress { min-width: 0; }
+      .field-grid { grid-template-columns: 1fr; }
+      .section-head, .section-body, .intro { padding: 15px; }
+      .actions { bottom: 0; border-radius: 8px 8px 0 0; }
+      .status { width: 100%; margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="bar">
+      <h1>統合失調症薬物治療アンケート</h1>
+      <div class="progress" aria-live="polite">
+        <span id="progressText">未入力</span>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      </div>
+    </div>
+  </header>
+  <main>
+    <form id="surveyForm">
+      <section class="intro">
+        <div class="consent-title">調査協力への同意</div>
+        <p>調査のご協力に同意いただける場合は、「同意する」にチェックを入れ、回答を進めてください。</p>
+        <div class="consent-box">
+          <label class="choice-line"><input type="checkbox" name="consent" value="同意する" required> 同意する</label>
+        </div>
+      </section>
+
+      <section class="section" id="profileSection">
+        <div class="section-head">
+          <h2>基本情報</h2>
+          <p>以下を入力してください。</p>
+        </div>
+        <div class="section-body">
+          <div class="field-grid">
+            <label class="field"><span>あなたの氏名</span><input type="text" name="氏名" autocomplete="name" required></label>
+            <label class="field"><span>専門医番号</span><input type="text" name="専門医番号" inputmode="numeric" required></label>
+            <label class="field"><span>医師歴年数（初期研修医歴2年を含む）</span><input type="text" name="医師歴年数" required></label>
+            <label class="field"><span>施設名</span><input type="text" name="施設名" required></label>
+          </div>
+        </div>
+      </section>
+
+      <div id="sections"></div>
+
+      <div class="actions">
+        <button type="submit">回答を確認</button>
+        <button type="button" class="secondary" id="saveDraft">一時保存</button>
+        <button type="button" class="secondary" id="downloadCsv" disabled>CSVをダウンロード</button>
+        <button type="button" class="secondary" id="copyJson" disabled>JSONをコピー</button>
+        <span class="status" id="statusText">回答はこのブラウザ内で処理されます。</span>
+      </div>
+      <pre class="output" id="output"></pre>
+    </form>
+  </main>
+
+  <script>
+    const antipsychotics = [
+      "アセナピン", "アリピプラゾール", "オランザピン", "クエチアピン", "クロザピン",
+      "パリペリドン", "ブレクスピプラゾール", "ブロナンセリン（貼付剤も含む）", "ペロスピロン",
+      "リスペリドン", "ルラシドン", "クロルプロマジン", "スルピリド", "ゾテピン",
+      "ハロペリドール", "フルフェナジン", "ペルフェナジン", "レボメプロマジン"
+    ];
+    const questions = [
+      { id: "q01", title: "統合失調症 問1", text: "陽性症状が前景となる場合、どの薬剤を選択しますか？", suffix: "薬剤を使用しない場合はすべて1を、使用する場合は少なくとも一つには9を付けてください。", items: antipsychotics },
+      { id: "q02", title: "統合失調症 問2", text: "陰性症状が前景となる場合、どの薬剤を選択しますか？", suffix: "薬剤を使用しない場合はすべて1を、使用する場合は少なくとも一つには9を付けてください。", items: antipsychotics },
+      { id: "q03", title: "統合失調症 問3", text: "抑うつ・不安症状が前景となる場合、どの薬剤を選択しますか？", suffix: "薬剤を使用しない場合はすべて1を、使用する場合は少なくとも一つには9を付けてください。", items: antipsychotics },
+      { id: "q04", title: "統合失調症 問4", text: "興奮・攻撃性が前景となる場合、どの薬剤を選択しますか？", suffix: "薬剤を使用しない場合はすべて1を、使用する場合は少なくとも一つには9を付けてください。", items: antipsychotics },
+      { id: "q05", title: "統合失調症 問5", text: "思考解体が前景となる場合、どの薬剤を選択しますか？", suffix: "薬剤を使用しない場合はすべて1を、使用する場合は少なくとも一つには9を付けてください。", items: antipsychotics },
+      { id: "q06", title: "統合失調症 問6", text: "認知機能障害が前景となる場合、どの薬剤を選択しますか？", suffix: "薬剤を使用しない場合はすべて1を、使用する場合は少なくとも一つには9を付けてください。", items: antipsychotics },
+      { id: "q07", title: "統合失調症 問7", text: "目立った症状がなく、社会復帰を目標にしている場合、どの薬剤を選択しますか？", suffix: "薬剤を使用しない場合はすべて1を、使用する場合は少なくとも一つには9を付けてください。", items: antipsychotics },
+      { id: "q08", title: "統合失調症 問8", text: "錐体外路系副作用が出やすい場合、どの薬剤を選択しますか？", suffix: "薬剤を使用しない場合はすべて1を、使用する場合は少なくとも一つには9を付けてください。", items: antipsychotics },
+      { id: "q09", title: "統合失調症 問9", text: "糖尿病に罹患している場合、どの薬剤を選択しますか？", suffix: "薬剤を使用しない場合はすべて1を、使用する場合は少なくとも一つには9を付けてください。", items: antipsychotics },
+      { id: "q10", title: "統合失調症 問10", text: "抗精神病薬治療中に遅発性ジスキネジアが見られた場合、どのような治療法を選択しますか？", suffix: "治療法を使用しない場合はすべて1を、使用する場合は少なくとも1つには9を付けてください。", items: ["抗精神病薬の減量", "抗精神病薬の切り替え", "アマンタジン（適応外）", "イチョウ葉エキス（適応外）", "ガバペンチン（適応外）", "カルシウム拮抗薬（適応外）", "クロナゼパム（適応外）", "ゾニサミド（適応外）", "バクロフェン（適応外）", "バルベナジン", "ビタミンB6（適応外）", "ビタミンE（適応外）", "ピラセタム（適応外）", "メラトニン（適応外）", "レベチラセタム（適応外）", "脳深部刺激療法（DBS）", "電気けいれん療法（ECT）"] },
+      { id: "q11", title: "統合失調症 問11", text: "持効性注射剤はどの時点で導入を検討しますか？", suffix: "持効性注射剤を使用しない場合はすべて1と、使用する場合は少なくとも1つには9を付けてください。", items: ["患者希望", "服薬アドヒアランスの低下", "繰り返す再発", "急性期から維持期への移行期", "初回エピソードで初めての薬物療法開始時"] },
+      { id: "q12", title: "統合失調症 問12", text: "持効性注射製剤の使い分けはどのような点を考慮して検討しますか？", suffix: "考慮することについて同意しない場合はすべて1と、同意する場合は少なくとも1つには9を付けてください。", items: ["年齢", "性別", "有効性", "忍容性", "現在の陽性症状の程度", "現在の陰性症状の程度", "現在の解体症状の程度", "現在の抑うつ・不安症状の程度", "現在の興奮・敵意症状の程度", "これまでの持効性注射製剤使用状況", "用量設定の多彩さ", "注射間隔の長さ", "薬力学的な違い（D2受容体フルアンタゴニストか否かなど）", "第1世代抗精神病薬か第2世代抗精神病薬か", "薬価の違い", "海外や国内ガイドライン", "アルゴリズムにおける推奨"] },
+      { id: "q13", title: "統合失調症 問13", text: "急性期治療において抗精神病薬の単剤治療では興奮が持続する場合、どの治療方法を併用しますか？", suffix: "治療方法を使用しない場合はすべて1を、使用する場合は少なくとも一つには9を付けてください。", items: antipsychotics },
+      { id: "q14", title: "統合失調症 問14", text: "入院状況下で興奮・焦燥症状が一時的に強くなった際、どの薬剤を頓服として使用しますか？\n＊静脈注射は緩徐な静注と点滴静注を含みます。\n＊口腔内崩壊錠は通常錠に含みます。", suffix: "薬剤を使用しない場合はすべて1を、使用する場合は少なくとも1つには9を付けてください。", items: ["アセナピン", "アリピプラゾール", "アリピプラゾール（内用液）", "オランザピン", "オランザピン（ザイディス）", "オランザピン（筋注）", "クエチアピン", "クロザピン", "パリペリドン", "ブレクスピプラゾール", "ブロナンセリン（貼付剤）", "ペロスピロン", "リスペリドン", "リスペリドン（内用液）", "ルラシドン", "クロルプロマジン", "クロルプロマジン（筋注）", "スルピリド", "ゾテピン", "ハロペリドール", "ハロペリドール（筋注）", "ハロペリドール（静注）", "フルフェナジン", "ペルフェナジン", "レボメプロマジン", "レボメプロマジン（筋注）", "ジアゼパム", "ジアゼパム（筋注）", "ジアゼパム（静注）", "フルニトラゼパム（静注）", "ロラゼパム", "ヒドロキシジン", "ヒドロキシジン（筋注）", "ヒドロキシジン（静注）"] },
+      { id: "q15", title: "統合失調症 問15", text: "入院状況下で精神症状が活発で病識乏しく拒薬が続く場合、どのような治療法を選択しますか？\n＊LAIは過去に内服で忍容性が確認できている場合とします。", suffix: "治療法を使用しない場合はすべて1を、使用する場合は少なくとも一つには9を付けてください。", items: ["アリピプラゾール（LAI）", "オランザピン（筋注）", "パリペリドン（LAI）", "ブロナンセリン（貼付剤）", "リスペリドン（LAI）", "クロルプロマジン（筋注）", "ハロペリドール（筋注）", "ハロペリドール（静注）", "ハロペリドール（LAI）", "フルフェナジン（LAI）", "レボメプロマジン（筋注）", "電気けいれん療法（ECT）"] },
+      { id: "q16", title: "統合失調症 問16", text: "治療抵抗性統合失調症の治療において、次のどの治療法を選択しますか？", suffix: "治療法を使用しない場合はすべて1を、使用する場合は少なくとも一つには9を付けてください。", items: ["クロザピンへの変薬", "電気けいれん療法の併用", "電気けいれん療法単独療法", "他の抗精神病薬（クロザピン以外）への変薬", "他の抗精神病薬（クロザピン以外）の併用", "抗うつ薬の併用", "気分安定薬の併用", "ベンゾジアゼピン系薬抗不安薬の併用", "抗認知症薬の併用"] },
+      { id: "q17", title: "統合失調症 問17", text: "身体拘束を要する初回エピソード治療抵抗性統合失調症に、最初の抗精神病薬から何剤の抗精神病薬を十分量十分期間確実に使用した後クロザピンを検討しますか？", suffix: "選択しない場合はすべて1を、選択する場合は少なくとも一つには9を付けてください。", items: ["2剤", "3剤", "4剤", "5剤以上"] },
+      { id: "q18", title: "統合失調症 問18", text: "外来加療可能な初回エピソード治療抵抗性統合失調症の急性期薬物治療に、最初の抗精神病薬から何剤の抗精神病薬を十分量十分期間確実に使用した後クロザピンを検討しますか？", suffix: "選択しない場合はすべて1を、選択する場合は少なくとも一つには9を付けてください。", items: ["2剤", "3剤", "4剤", "5剤以上"] },
+      { id: "q19", title: "統合失調症 問19", text: "クロザピン治療に十分反応しない治療抵抗性統合失調症に対して、どのような治療法を選択しますか？", suffix: "治療法を使用しない場合はすべて1を、使用する場合は少なくとも一つには9を付けてください。", items: ["反応が得られるのを8週間以上待つ", "クロザピンの投与量を200mg以上にする", "薬物血中濃度モニタリングによりクロザピン血中濃度350 ng/mL以上に調節", "クロザピン以外の抗精神病薬に置換", "クロザピンを中止し電気けいれん療法の単独使用", "電気けいれん療法の併用", "第2世代抗精神病薬の併用（本邦では原則併用不可）", "第1世代抗精神病薬の併用（本邦では原則併用不可）", "抗うつ薬の併用", "気分安定薬の併用", "ベンゾジアゼピン系薬抗不安薬の併用", "精神療法または心理社会的介入の併用"] },
+      { id: "q20", title: "統合失調症 問20", text: "統合失調症において抗精神病薬を減量する場合、以下のどの要素を考慮して減量を検討しますか。\n＊最小有効用量とは治療に有効な効果を示す最小の用量です。", suffix: "要素を考慮しない場合はすべて1を、考慮する場合は少なくとも一つには9を付けてください。", items: ["残存している陽性症状が軽度", "残存している陰性症状が軽度", "残存している抑うつ・不安症状が軽度", "残存している興奮・攻撃性が軽度", "残存している思考解体が軽度", "安定している期間が6カ月間以上", "自傷他害の既往がない", "服用している薬剤が低用量", "使用されている持効性注射剤の種類", "副作用がある", "再発予防策の理解がある", "現在の社会適応が良好", "症状悪化徴候の把握ができる", "過去のエピソード回数が多い", "過去の治療反応が良好", "病識がある", "挙児希望がある（女性の場合）", "年齢が高い", "罹病期間が長い", "減量後の用量が最小有効用量以上"] },
+      { id: "q21", title: "統合失調症 問21", text: "多剤で治療されている統合失調症で抗精神病薬単剤化を目指す場合、以下のどの要素を考慮して併用薬の中止を検討しますか？", suffix: "要素を考慮しない場合はすべて1を、考慮する場合は少なくとも一つには9を付けてください。", items: ["残存している陽性症状が軽度", "残存している陰性症状が軽度", "残存している抑うつ・不安症状が軽度", "残存している興奮・攻撃性が軽度", "残存している思考解体が軽度", "安定している期間が6カ月間以上", "自傷他害の既往がない", "服用している抗精神病薬剤数が少ない", "併用している薬剤が低用量", "単剤化するための持効性注射剤がある", "副作用がある", "再発予防策の理解がある", "現在の社会適応が良好", "症状悪化徴候の把握ができる", "過去のエピソード回数が多い", "過去の治療反応が良好", "病識がある", "挙児希望がある（女性の場合）", "家族等に単剤化の意向がある", "治療ガイドラインやアルゴリズムにおける推奨", "患者本人の希望がある"] }
+    ];
+
+    const form = document.getElementById("surveyForm");
+    const sectionsRoot = document.getElementById("sections");
+    const output = document.getElementById("output");
+    const statusText = document.getElementById("statusText");
+    const downloadCsvButton = document.getElementById("downloadCsv");
+    const copyJsonButton = document.getElementById("copyJson");
+    const progressText = document.getElementById("progressText");
+    const progressFill = document.getElementById("progressFill");
+    let latestRecord = null;
+
+    function fieldName(question, item) {
+      return `${question.title} [${item}]`;
+    }
+    function renderQuestion(question) {
+      const section = document.createElement("section");
+      section.className = "section";
+      section.id = question.id;
+      const rows = question.items.map(item => `
+        <tr>
+          <td>${escapeHtml(item)}</td>
+          ${Array.from({ length: 9 }, (_, index) => {
+            const value = index + 1;
+            const name = fieldName(question, item);
+            return `<td class="radio-cell"><label aria-label="${escapeHtml(item)} ${value}"><input type="radio" name="${escapeHtml(name)}" value="${value}" required></label></td>`;
+          }).join("")}
+        </tr>`).join("");
+      section.innerHTML = `
+        <div class="section-head">
+          <h2>${escapeHtml(question.title)}</h2>
+          <p>${escapeHtml(question.text)}</p>
+        </div>
+        <div class="section-body">
+          <div class="matrix-wrap">
+            <table class="matrix">
+              <thead>
+                <tr><th>選択肢</th>${Array.from({ length: 9 }, (_, i) => `<th>${i + 1}</th>`).join("")}</tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+          <p class="hint">下記の選択について「同意する程度」を 1 から 9 で回答してください。${escapeHtml(question.suffix)}</p>
+          <p class="error" id="${question.id}-error">この設問は、全項目に回答し、全て1または少なくとも1つ9を含める必要があります。</p>
+        </div>`;
+      return section;
+    }
+    function escapeHtml(value) {
+      return String(value).replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+    }
+    function render() {
+      sectionsRoot.append(...questions.map(renderQuestion));
+    }
+    function collectRecord() {
+      const data = new FormData(form);
+      const record = { "タイムスタンプ": new Date().toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" }) };
+      for (const [key, value] of data.entries()) record[key] = value;
+      record["調査のご協力に同意"] = data.get("consent") || "";
+      delete record.consent;
+      return record;
+    }
+    function validateQuestion(question, scroll) {
+      const values = question.items.map(item => {
+        const checked = Array.from(form.elements).find(control => control.name === fieldName(question, item) && control.checked);
+        return checked ? Number(checked.value) : null;
+      });
+      const complete = values.every(value => value !== null);
+      const validRule = complete && (values.every(value => value === 1) || values.some(value => value === 9));
+      const section = document.getElementById(question.id);
+      const error = document.getElementById(`${question.id}-error`);
+      section.classList.toggle("invalid", !validRule);
+      error.style.display = validRule ? "none" : "block";
+      if (!validRule && scroll) section.scrollIntoView({ behavior: "smooth", block: "start" });
+      return validRule;
+    }
+    function validateAll(scrollFirstInvalid = false) {
+      if (!form.reportValidity()) return false;
+      let firstInvalid = null;
+      const allValid = questions.every(question => {
+        const valid = validateQuestion(question, false);
+        if (!valid && !firstInvalid) firstInvalid = question;
+        return valid;
+      });
+      if (!allValid && scrollFirstInvalid && firstInvalid) validateQuestion(firstInvalid, true);
+      return allValid;
+    }
+    function headers() {
+      return [
+        "タイムスタンプ", "調査のご協力に同意", "氏名", "専門医番号", "医師歴年数", "施設名",
+        ...questions.flatMap(question => question.items.map(item => fieldName(question, item)))
+      ];
+    }
+    function csvValue(value) {
+      const text = value == null ? "" : String(value);
+      return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+    }
+    function toCsv(record) {
+      const cols = headers();
+      return `${cols.map(csvValue).join(",")}\n${cols.map(col => csvValue(record[col])).join(",")}\n`;
+    }
+    function download(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = filename;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+    function updateProgress() {
+      const total = form.querySelectorAll("input[required]").length;
+      const requiredGroups = new Set(Array.from(form.querySelectorAll("input[type='radio'][required]")).map(input => input.name));
+      const checkedRadioGroups = new Set(Array.from(form.querySelectorAll("input[type='radio']:checked")).map(input => input.name));
+      const requiredNonRadios = Array.from(form.querySelectorAll("input[required]:not([type='radio'])"));
+      const done = requiredNonRadios.filter(input => input.type === "checkbox" ? input.checked : input.value.trim()).length + checkedRadioGroups.size;
+      const adjustedTotal = requiredNonRadios.length + requiredGroups.size;
+      const percent = adjustedTotal ? Math.round(done / adjustedTotal * 100) : 0;
+      progressText.textContent = `${done} / ${adjustedTotal} 項目`;
+      progressFill.style.width = `${percent}%`;
+    }
+    function saveDraft() {
+      localStorage.setItem("schizophreniaSurveyDraft", JSON.stringify(collectRecord()));
+      statusText.textContent = "一時保存しました。";
+    }
+    function restoreDraft() {
+      const raw = localStorage.getItem("schizophreniaSurveyDraft");
+      if (!raw) return;
+      const record = JSON.parse(raw);
+      for (const [key, value] of Object.entries(record)) {
+        if (key === "タイムスタンプ") continue;
+        const controls = Array.from(form.elements).filter(control => control.name === key);
+        if (!controls.length) continue;
+        if (controls[0].type === "radio") {
+          const target = controls.find(control => control.value === String(value));
+          if (target) target.checked = true;
+        } else if (controls[0].type === "checkbox") {
+          controls[0].checked = Boolean(value);
+        } else {
+          controls[0].value = value;
+        }
+      }
+      statusText.textContent = "保存済みの下書きを復元しました。";
+    }
+
+    render();
+    restoreDraft();
+    updateProgress();
+    form.addEventListener("input", updateProgress);
+    document.getElementById("saveDraft").addEventListener("click", saveDraft);
+    form.addEventListener("submit", event => {
+      event.preventDefault();
+      if (!validateAll(true)) {
+        statusText.textContent = "未入力または回答ルールに合わない設問があります。";
+        return;
+      }
+      latestRecord = collectRecord();
+      const json = JSON.stringify(latestRecord, null, 2);
+      output.textContent = json;
+      output.style.display = "block";
+      downloadCsvButton.disabled = false;
+      copyJsonButton.disabled = false;
+      statusText.textContent = "回答を確認しました。CSVダウンロードまたはJSONコピーが可能です。";
+      output.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    });
+    downloadCsvButton.addEventListener("click", () => {
+      if (!latestRecord) return;
+      download(`schizophrenia-survey-${Date.now()}.csv`, toCsv(latestRecord), "text/csv;charset=utf-8");
+    });
+    copyJsonButton.addEventListener("click", async () => {
+      if (!latestRecord) return;
+      await navigator.clipboard.writeText(JSON.stringify(latestRecord, null, 2));
+      statusText.textContent = "JSONをクリップボードにコピーしました。";
+    });
+  </script>
+</body>
+</html>
